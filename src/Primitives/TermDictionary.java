@@ -7,5 +7,11 @@ import java.util.Vector;
  */
 public class TermDictionary
 {
-    private Vector<String> data;
+    private Vector<Data> data;
+
+    class Data
+    {
+        private String term;
+        private double idf;
+    }
 }

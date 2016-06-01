@@ -7,7 +7,6 @@ import java.util.Vector;
  */
 public class Doc
 {
-    private long docId;
+    private int docId;
     private TermVector termVector;
-    private double idf;
 }
