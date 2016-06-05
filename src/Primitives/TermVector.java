@@ -6,4 +6,14 @@ package Primitives;
 public class TermVector
 {
     private FreqWeight[] termFreqVector;
+    private double length;//length of vector
+    public double getLength()
+    {
+        return this.length;
+    }
+
+    public FreqWeight[] getFreqWeight()
+    {
+        return this.termFreqVector;
+    }
 }
