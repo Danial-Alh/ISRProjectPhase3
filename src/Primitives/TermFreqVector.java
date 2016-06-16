@@ -10,10 +10,10 @@ public class TermFreqVector
     private Long indexPtr;
     private TermVector termVectorParent;
 
-    public TermFreqVector(TermVector termVectorParent)
+    public TermFreqVector(TermVector termVectorParent, String fileName)
     {
         this.termVectorParent = termVectorParent;
-        fileID = RandomAccessFileManager.createNewInstance("termVector.txt");
+        fileID = RandomAccessFileManager.createNewInstance(fileName);
         fileVector = new FileVector<>(FreqWeight.class, fileID);
         indexPtr = null;
     }

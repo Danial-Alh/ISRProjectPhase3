@@ -34,10 +34,10 @@ public class Cluster
 
         for (int i = 0; i < n; i++)
         {
-            tmpFW = followers.elementAt(i).getTermVector().getFreqWeight();
+//            tmpFW = followers.elementAt(i).getTermVector().getFreqWeight();
             for (int j = 0; j < m; j++)
             {
-                tmpVal[j] += tmpFW[j].getValue();
+//                tmpVal[j] += tmpFW[j].getValue();
             }
         }
         for (int j = 0; j < m; j++)
@@ -54,8 +54,8 @@ public class Cluster
         //TODO:
         for (Doc doc : followers)
         {
-            double tmp = Arithmatics.getDistance(doc.getTermVector().getFreqWeight(), termFreqVectorSample);
-            doc.setDistanceFromLeader(tmp);
+//            double tmp = Arithmatics.getDistance(doc.getTermVector().getFreqWeight(), termFreqVectorSample);
+//            doc.setDistanceFromLeader(tmp);
         }
     }
 

@@ -52,12 +52,12 @@ public class ClusterManager
             Cluster condidateCl = null;
             for (Cluster cl : clusters)
             {
-                double tmp = Arithmatics.getDistance(cl.getTermFreqVectorSample(), doc.getTermVector().getFreqWeight());
-                if (tmp < bestDistance)
-                {
-                    condidateCl = cl;
-                    bestDistance = tmp;
-                }
+//                double tmp = Arithmatics.getDistance(cl.getTermFreqVectorSample(), doc.getTermVector().getFreqWeight());
+//                if (tmp < bestDistance)
+//                {
+//                    condidateCl = cl;
+//                    bestDistance = tmp;
+//                }
             }
             condidateCl.addToFollowers(doc);
         }
@@ -86,12 +86,12 @@ public class ClusterManager
                 {
                     if (i != j)
                     {
-                        double tmp = Arithmatics.getDistance(doc.getTermVector().getFreqWeight(), clusters.elementAt(j).getTermFreqVectorSample());
-                        if (tmp < bestDistance)
-                        {
-                            bestDistance = tmp;
-                            bestIndex = j;
-                        }
+//                        double tmp = Arithmatics.getDistance(doc.getTermVector().getFreqWeight(), clusters.elementAt(j).getTermFreqVectorSample());
+//                        if (tmp < bestDistance)
+//                        {
+//                            bestDistance = tmp;
+//                            bestIndex = j;
+//                        }
                     }
                 }
                 if (bestIndex != i)
