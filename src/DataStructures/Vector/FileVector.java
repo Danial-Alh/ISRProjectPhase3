@@ -6,6 +6,7 @@ import Primitives.Interfaces.Sizeofable;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Vector;
 
 public class FileVector<Value extends Sizeofable & Parsable>
 {
@@ -39,7 +40,7 @@ public class FileVector<Value extends Sizeofable & Parsable>
 
     private Long createIndexAndFindValuePtrOnFile(Long indexPtr, int offset)
     {
-        RandomAccessFile instance = RandomAccessFileManager.getMyInstance();
+        RandomAccessFile instance = RandomAccessFileManager.getInstance();
         Long tempIndexPtr = indexPtr;
         while (true)
         {
@@ -74,7 +75,7 @@ public class FileVector<Value extends Sizeofable & Parsable>
 
     private Value readValueAt(Long valuePtrOnFile)
     {
-        RandomAccessFile instance = RandomAccessFileManager.getMyInstance();
+        RandomAccessFile instance = RandomAccessFileManager.getInstance();
         Value value = null;
         try
         {
@@ -83,6 +84,8 @@ public class FileVector<Value extends Sizeofable & Parsable>
                 System.out.println("ljlskdjfl");
             instance.seek(valuePtrOnFile);
             int size = instance.readInt();
+            if(size == -1)
+                return null;
             byte tempByteArray[] = new byte[size];
             instance.read(tempByteArray);
             value.parseFromByteArray(tempByteArray);
@@ -95,7 +98,7 @@ public class FileVector<Value extends Sizeofable & Parsable>
 
     private void writeValueAt(Long valuePtrOnFile, Value value)
     {
-        RandomAccessFile instance = RandomAccessFileManager.getMyInstance();
+        RandomAccessFile instance = RandomAccessFileManager.getInstance();
         try
         {
             instance.seek(valuePtrOnFile);
@@ -110,7 +113,7 @@ public class FileVector<Value extends Sizeofable & Parsable>
 
     private Long writeNewValueOnFile(Long ptrInIndex)
     {
-        RandomAccessFile instance = RandomAccessFileManager.getMyInstance();
+        RandomAccessFile instance = RandomAccessFileManager.getInstance();
         Long resPtr = null;
         try
         {
@@ -129,7 +132,7 @@ public class FileVector<Value extends Sizeofable & Parsable>
 
     private Long findValuePtrOnFile(Long indexPtr, int offset)
     {
-        RandomAccessFile instance = RandomAccessFileManager.getMyInstance();
+        RandomAccessFile instance = RandomAccessFileManager.getInstance();
         Long tempIndexPtr = indexPtr;
         while (true)
         {
@@ -158,7 +161,7 @@ public class FileVector<Value extends Sizeofable & Parsable>
     private Long createNewIndex()
     {
         Long returnAdd = null;
-        RandomAccessFile instance = RandomAccessFileManager.getMyInstance();
+        RandomAccessFile instance = RandomAccessFileManager.getInstance();
         try
         {
             instance.seek(instance.getChannel().size());
@@ -174,4 +177,34 @@ public class FileVector<Value extends Sizeofable & Parsable>
     }
 
 
+    public Vector<Value> getAllElements(Long indexPtr)
+    {
+        RandomAccessFile instance = RandomAccessFileManager.getInstance();
+        Vector<Value> resultVector = new Vector<>();
+        long tempIndexPtr = indexPtr;
+        try
+        {
+            while(true)
+            {
+                instance.seek(tempIndexPtr);
+                for (int i = 0; i < INDEX_DATA_SIZE; i++)
+                {
+                    long valuePtr = instance.readLong();
+                    if (valuePtr == -1)
+                        return resultVector;
+                    Value value = readValueAt(valuePtr);
+                    if (value != null)
+                        resultVector.add(value);
+                }
+                long nextIndexPtr = instance.readLong();
+                if (nextIndexPtr == -1)
+                    return resultVector;
+                tempIndexPtr = nextIndexPtr;
+            }
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return resultVector;
+    }
 }

@@ -46,21 +46,23 @@ public class ExtendedFileBtree<Value extends Sizeofable & Parsable> extends File
 
     }
 
-    public void insert(String key, Value value, Long startingNode) /*throws Exception*/
+    public void insert(String key, Value value, Long startingNode)
     {
-//        if(key.getBytes().length > KEY_MAX_SIZE || value.sizeof() > VALUE_MAX_SIZE)
-//            throw new Exception("length exceeded");
         FileNode<Value> rootNodeTemplate = getNode(startingNode);
         if (rootNodeTemplate.getSize() == 0)
         {
             insert(rootNodeTemplate, new Pair<>(key, value),
                     null, null);
+            numberOfTermsAdded++;
             return;
         }
         FileDataLocation<Value> newLoc = findLoc(key, rootNodeTemplate);
         if (!thisDataExists(key, newLoc)) // if key not exists
+        {
             insert(newLoc.getNode(), new Pair<>(key, value),
                     null, null);
+            numberOfTermsAdded++;
+        }
     }
 
     @Override

@@ -158,7 +158,7 @@ public class FileNode<Value extends Sizeofable & Parsable>
 
     public void fetchNodeFromHard(Long myPointer)
     {
-        RandomAccessFile instance = RandomAccessFileManager.getMyInstance();
+        RandomAccessFile instance = RandomAccessFileManager.getInstance();
         if (myPointer == null)
             try
             {
@@ -215,7 +215,7 @@ public class FileNode<Value extends Sizeofable & Parsable>
 
     private void commitNewNodeOnFile()
     {
-        RandomAccessFile instance = RandomAccessFileManager.getMyInstance();
+        RandomAccessFile instance = RandomAccessFileManager.getInstance();
         try
         {
             instance.seek(myPointer);
@@ -242,7 +242,7 @@ public class FileNode<Value extends Sizeofable & Parsable>
     public void commitChanges()
     {
 //            System.out.println("committing, pointer: " + myPointer);
-        RandomAccessFile instance = RandomAccessFileManager.getMyInstance();
+        RandomAccessFile instance = RandomAccessFileManager.getInstance();
         try
         {
             instance.seek(myPointer);

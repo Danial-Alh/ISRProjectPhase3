@@ -15,7 +15,7 @@ public class RandomAccessFileManager
 
     }
 
-    public static RandomAccessFile getMyInstance()
+    public static RandomAccessFile getInstance()
     {
         if(!instanceCreated)
         {

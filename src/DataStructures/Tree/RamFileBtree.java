@@ -1,11 +1,14 @@
 package DataStructures.Tree;
 
+import DataStructures.Tree.Nodes.FileNode;
+import FileManagement.RandomAccessFileManager;
 import Primitives.Interfaces.Parsable;
 import Primitives.Interfaces.Sizeofable;
 import DataStructures.Tree.Nodes.DataLocations.RamDataLocation;
 import DataStructures.Tree.Nodes.RamFileNode;
 import javafx.util.Pair;
 
+import java.io.IOException;
 import java.util.Vector;
 
 public class RamFileBtree<Value extends Sizeofable & Parsable>
@@ -19,8 +22,11 @@ public class RamFileBtree<Value extends Sizeofable & Parsable>
     protected final long MB = 1024 * 1024;
     protected int depth;
     protected RamFileNode<Value> root;
-    ExtendedFileBtree<Value> extendedFileBtree;
+    private ExtendedFileBtree<Value> extendedFileBtree;
     private boolean depthIncremented;
+    private long lastReadLocation;
+    private boolean isFirstRead;
+    private long numberOfTermsAdded;
 
     public RamFileBtree(int keyMaxSize, int valueMaxSize, int halfMaxSize, Class valueClassType)
     {
@@ -30,6 +36,8 @@ public class RamFileBtree<Value extends Sizeofable & Parsable>
         this.valueClassType = valueClassType;
         this.MAX_SIZE = 2 * halfMaxSize - 1;
         depth = 1;
+        lastReadLocation = 0;
+        isFirstRead = true;
         depthIncremented = false;
 
         root = createNewLeafNode(null);
@@ -39,6 +47,18 @@ public class RamFileBtree<Value extends Sizeofable & Parsable>
     public static int getNewID()
     {
         return ++idCounter;
+    }
+
+    public Value search(String key)
+    {
+        RamFileNode<Value> rootNodeTemplate = getRootNode();
+        if (rootNodeTemplate.getSize() == 0)
+            return null;
+        RamDataLocation<Value> loc = findLoc(key, rootNodeTemplate);
+        if (!thisDataExists(key, loc))
+            return searchOnExtendedFileBtree(key, loc);
+        return loc.getNode().getKeyValPair().elementAt(loc.getOffset()).getValue();
+//        return search(key, rootNodeTemplate);
     }
 
     public void update(String key, Value value)
@@ -55,12 +75,6 @@ public class RamFileBtree<Value extends Sizeofable & Parsable>
         updateValue(key, value, loc.getNode(), loc.getOffset());
     }
 
-    private void updateOnExtendedFileBtree(String key, Value value, RamDataLocation<Value> loc)
-    {
-        if (loc.getNode().isChildAreOnFile())
-            extendedFileBtree.update(key, value, loc.getNode().getFileChild().elementAt(loc.getOffset()));
-    }
-
     public void insert(String key, Value value) throws Exception
     {
         if (key.getBytes().length > KEY_MAX_SIZE || value.sizeof() > VALUE_MAX_SIZE)
@@ -71,6 +85,7 @@ public class RamFileBtree<Value extends Sizeofable & Parsable>
             insert(rootNodeTemplate, new Pair<>(key, value),
                     null, null,
                     null, null);
+            numberOfTermsAdded++;
             checkMemoryAndFreeIfRequired();
             return;
         }
@@ -80,12 +95,46 @@ public class RamFileBtree<Value extends Sizeofable & Parsable>
             if (newLoc.getNode().isChildAreOnFile())
                 extendedFileBtree.insert(key, value, newLoc.getNode().getFileChild().elementAt(newLoc.getOffset()));
             else
+            {
                 insert(newLoc.getNode(), new Pair<>(key, value),
                         null, null,
                         null, null);
+                numberOfTermsAdded++;
+            }
             checkMemoryAndFreeIfRequired();
         }
+    }
 
+    public void initializeForSequentialRead()
+    {
+        isFirstRead = true;
+        lastReadLocation = 0;
+        storeNodesOnFile();
+    }
+
+    public Vector<Pair<String, Value>> getNextNode()
+    {
+        if(isFirstRead)
+            return getRootNode().getKeyValPair();
+
+        FileNode<Value> node = null;
+        try
+        {
+            if(lastReadLocation >= RandomAccessFileManager.getInstance().getChannel().size())
+                return null;
+            node = extendedFileBtree.getNode(lastReadLocation);
+            lastReadLocation = RandomAccessFileManager.getInstance().getFilePointer();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return node.getKeyValPair();
+    }
+
+    private void updateOnExtendedFileBtree(String key, Value value, RamDataLocation<Value> loc)
+    {
+        if (loc.getNode().isChildAreOnFile())
+            extendedFileBtree.update(key, value, loc.getNode().getFileChild().elementAt(loc.getOffset()));
     }
 
     protected void checkMemoryAndFreeIfRequired()
@@ -131,18 +180,6 @@ public class RamFileBtree<Value extends Sizeofable & Parsable>
         return false;
     }
 
-    public Value search(String key)
-    {
-        RamFileNode<Value> rootNodeTemplate = getRootNode();
-        if (rootNodeTemplate.getSize() == 0)
-            return null;
-        RamDataLocation<Value> loc = findLoc(key, rootNodeTemplate);
-        if (!thisDataExists(key, loc))
-            return searchOnExtendedFileBtree(key, loc);
-        return loc.getNode().getKeyValPair().elementAt(loc.getOffset()).getValue();
-//        return search(key, rootNodeTemplate);
-    }
-
     private Value searchOnExtendedFileBtree(String key, RamDataLocation<Value> loc)
     {
         if (loc.getNode().isChildAreOnFile())
@@ -180,40 +217,6 @@ public class RamFileBtree<Value extends Sizeofable & Parsable>
                 newNodeTemplate.getMyPointer(), startingNode.getMyPointer(),
                 null, null);
     }
-
-    public String toString()
-    {
-        Vector<RamFileNode<Value>> nodeTemplateQ = new Vector<>();
-        nodeTemplateQ.add(getRootNode());
-        nodeTemplateQ.add(null);
-        return toString(nodeTemplateQ, 1) + "\n\n***********************\n\n" + extendedFileBtree.toString();
-    }
-
-//    public void insertFromFileNodes(RamFileNode<Value> node, Pair<String, Value> newData, Long smallerChildPointer, Long biggerChildPointer)
-//    {
-//
-//        int location = node.binarySearchForLocationToAdd(newData.getKey());
-//        if (location == node.getKeyValPair().size())
-//        {
-//            node.getKeyValPair().add(newData);
-//            node.getFileChild().add(biggerChildPointer);
-//        } else
-//        {
-//            node.getKeyValPair().insertElementAt(newData, location);
-//            node.getFileChild().insertElementAt(biggerChildPointer, location + 1);
-//        }
-//        if (biggerChildPointer != null)
-//        {
-//            extendedFileBtree.updateParent(biggerChildPointer, node);
-//        }
-//        if (smallerChildPointer != null)
-//        {
-//            node.getFileChild().set(location, smallerChildPointer);
-//            extendedFileBtree.updateParent(smallerChildPointer, node);
-//        }
-//        if (node.getSize() > MAX_SIZE)
-//            splitCurrentNode(node);
-//    }
 
     protected void insert(RamFileNode<Value> startingNode, Pair<String, Value> newData,
                           RamFileNode<Value> biggerChild, RamFileNode<Value> smallerChild,
@@ -373,5 +376,18 @@ public class RamFileBtree<Value extends Sizeofable & Parsable>
             if (childNode != null) nodeTemplateQ.add(getNode(childNode));
         }
         return currentNodeTemplate.toString() + "\t" + toString(nodeTemplateQ, stringDepth);
+    }
+
+    public String toString()
+    {
+        Vector<RamFileNode<Value>> nodeTemplateQ = new Vector<>();
+        nodeTemplateQ.add(getRootNode());
+        nodeTemplateQ.add(null);
+        return toString(nodeTemplateQ, 1) + "\n\n***********************\n\n" + extendedFileBtree.toString();
+    }
+
+    public long getNumberOfTermsAdded()
+    {
+        return numberOfTermsAdded + extendedFileBtree.getNumberOfTermsAdded();
     }
 }

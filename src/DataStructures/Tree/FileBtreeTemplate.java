@@ -17,6 +17,8 @@ public abstract class FileBtreeTemplate<Value extends Sizeofable & Parsable>
     protected int depth;
     protected HashMap<Long, FileNode<Value>> nodeCache;
 
+    protected long numberOfTermsAdded;
+
     public FileBtreeTemplate(int keyMaxSize, int valueMaxSize, int halfMaxSize, Class valueClassType)
     {
         nodeCache = new HashMap<>();
@@ -26,7 +28,7 @@ public abstract class FileBtreeTemplate<Value extends Sizeofable & Parsable>
         this.valueClassType = valueClassType;
         this.MAX_SIZE = 2 * halfMaxSize - 1;
         depth = 1;
-
+        numberOfTermsAdded = 0;
     }
 
     public abstract Value search(String key);
@@ -110,11 +112,11 @@ public abstract class FileBtreeTemplate<Value extends Sizeofable & Parsable>
         return cacheResult;
     }
 
-
     protected Value returnValue(String key, FileNode<Value> startingNodeTemplate, int i1)
     {
         return startingNodeTemplate.getKeyValPair().elementAt(i1).getValue();
     }
+
 
     protected void updateValue(String key, Value value, FileNode<Value> startingNodeTemplate, int i1)
     {
@@ -136,7 +138,6 @@ public abstract class FileBtreeTemplate<Value extends Sizeofable & Parsable>
         return createNewMiddleNode(parent);
     }
 
-
     protected boolean thisDataExists(String key, FileDataLocation<Value> newLoc)
     {
         if (newLoc.getOffset() == newLoc.getNode().getSize() ||
@@ -144,6 +145,7 @@ public abstract class FileBtreeTemplate<Value extends Sizeofable & Parsable>
             return false;
         return true;
     }
+
 
     protected FileNode<Value>[] splitCurrentNode(FileNode<Value> startingNode)
     {
@@ -185,40 +187,6 @@ public abstract class FileBtreeTemplate<Value extends Sizeofable & Parsable>
         return (nextChild == null ? new FileDataLocation<Value>(startingNodeTemplate, i1) : findLoc(key, getNode(nextChild)));
     }
 
-//    protected Value search(String key, FileNode <Value> startingNodeTemplate)
-//    {
-//        if (startingNodeTemplate == null)
-//            return null;
-//
-//        Long nextChild = null;
-//        int i1 = startingNodeTemplate.binarySearchForLocationToAdd(key);
-//        if (i1 == startingNodeTemplate.getSize())
-//            nextChild = startingNodeTemplate.getChild().elementAt(i1);
-//        else if (i1 == -1)
-//            System.out.println("ohhhh my goood");
-//        else if (startingNodeTemplate.getKeyValPair().elementAt(i1).getKey().compareTo(key) == 0)
-//            return returnValue(key, startingNodeTemplate, i1);
-//        else
-//            nextChild = startingNodeTemplate.getChild().elementAt(i1);
-//        return search(key, getNode(nextChild));
-//    }
-
-
-//    protected void update(String key, Value value, FileNode <Value> startingNodeTemplate)
-//    {
-//        FileNode <Value> nextChild;
-//        int i1 = startingNodeTemplate.binarySearchForLocationToAdd(key);
-//        if (i1 == startingNodeTemplate.getSize())
-//            nextChild = startingNodeTemplate.getChild().elementAt(i1);
-//        else if (startingNodeTemplate.getKeyValPair().elementAt(i1).getKey().compareTo(key) == 0)
-//        {
-//            updateValue(key, value, startingNodeTemplate, i1);
-//            return;
-//        } else
-//            nextChild = getNode(startingNodeTemplate.getChild().elementAt(i1));
-//        update(key, value, nextChild);
-//    }
-
     protected String toString(Vector<FileNode<Value>> nodeTemplateQ, int stringDepth)
     {
         if (nodeTemplateQ.size() == 0)
@@ -245,5 +213,10 @@ public abstract class FileBtreeTemplate<Value extends Sizeofable & Parsable>
             parentNode = getNode(currentNodeTemplate.getParent());
         return currentNodeTemplate.toString(parentNode) +
                 "\t" + toString(nodeTemplateQ, stringDepth);
+    }
+
+    public long getNumberOfTermsAdded()
+    {
+        return numberOfTermsAdded;
     }
 }

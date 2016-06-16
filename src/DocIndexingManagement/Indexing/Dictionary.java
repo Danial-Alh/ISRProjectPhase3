@@ -4,12 +4,18 @@ import DataStructures.Tree.RamFileBtree;
 import DataStructures.Vector.FileVector;
 import Primitives.TermAbstractDetail;
 import Primitives.TermDocDetail;
+import Primitives.TermPosting;
+import javafx.util.Pair;
+
+import java.util.Vector;
 
 public class Dictionary
 {
     private static Dictionary instance = null;
-    RamFileBtree<TermAbstractDetail> tree;
-    FileVector<TermDocDetail> fileVector;
+    private RamFileBtree<TermAbstractDetail> tree;
+    private FileVector<TermDocDetail> fileVector;
+    private int lastOffsetRead;
+    private Vector<Pair<String, TermAbstractDetail>> lastNodeRead;
 
     private Dictionary()
     {
@@ -17,6 +23,8 @@ public class Dictionary
         TermAbstractDetail termAbstractDetail = new TermAbstractDetail(null, null);
         tree = new RamFileBtree<>(temp.length(), termAbstractDetail.sizeof(), 17, TermAbstractDetail.class);
         fileVector = new FileVector<>(TermDocDetail.class);
+        lastOffsetRead = Integer.MAX_VALUE;
+        lastNodeRead = null;
     }
 
     public static Dictionary getIntance()
@@ -51,5 +59,31 @@ public class Dictionary
             fileVector.writeElementAt(searchRes.getFilePtr(), docID, termDocDetail);
             tree.update(term, searchRes);
         }
+    }
+
+    public void initializeForSequentialRead()
+    {
+        tree.initializeForSequentialRead();
+        lastNodeRead = tree.getNextNode();
+        lastOffsetRead = 0;
+    }
+
+    public TermPosting getNextTermPosting()
+    {
+        if(lastOffsetRead >= lastNodeRead.size())
+        {
+            lastNodeRead = tree.getNextNode();
+            if(lastNodeRead == null)
+                return null;
+            lastOffsetRead = 0;
+        }
+
+        Pair<String, TermAbstractDetail> currentPair = lastNodeRead.elementAt(lastOffsetRead);
+        Vector<TermDocDetail> allElements = fileVector.getAllElements(currentPair.getValue().getFilePtr());
+        TermPosting termPosting = new TermPosting(currentPair.getKey(), allElements,
+                Math.log(tree.getNumberOfTermsAdded()/allElements.size()));
+
+        lastOffsetRead++;
+        return termPosting;
     }
 }
