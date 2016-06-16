@@ -4,9 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
 
-/**
- * Created by danial on 5/28/16.
- */
 public class RandomAccessFileManager
 {
     private static String path = "index.txt";

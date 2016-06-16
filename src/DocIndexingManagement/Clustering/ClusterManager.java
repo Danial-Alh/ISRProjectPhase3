@@ -1,10 +1,9 @@
-package Vector;
+package DocIndexingManagement.Clustering;
 
 import Primitives.Doc;
 import Primitives.FreqWeight;
 
 import java.util.Vector;
-import java.util.concurrent.locks.Condition;
 
 /**
  * Created by ali on 6/5/16.

@@ -1,10 +1,7 @@
-package Vector;
+package DocIndexingManagement.Clustering;
 
 import Primitives.FreqWeight;
 
-/**
- * Created by ali on 6/4/16.
- */
  public class Arithmatics {
     static double getDistance(FreqWeight[] a, FreqWeight[] b)
     {

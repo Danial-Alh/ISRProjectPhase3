@@ -1,4 +1,4 @@
-package Vector;
+package DocIndexingManagement.Clustering;
 
 import Primitives.Doc;
 

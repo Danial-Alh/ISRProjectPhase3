@@ -1,10 +1,8 @@
-package Vector;
+package DocIndexingManagement.Clustering;
 
 import Primitives.Doc;
 import Primitives.FreqWeight;
-import Primitives.TermVector;
 
-import java.security.PrivateKey;
 import java.util.Vector;
 
 /**
