@@ -12,7 +12,8 @@ public class ByteUtils
         return buffer.array();
     }
 
-    public static long bytesToLong(byte[] bytes) {
+    public static long bytesToLong(byte[] bytes)
+    {
         buffer.put(bytes, 0, bytes.length);
         buffer.flip();//need flip
         return buffer.getLong();
@@ -29,5 +30,18 @@ public class ByteUtils
         buffer.put(bytes, 0, bytes.length);
         buffer.flip();//need flip
         return buffer.getInt();
+    }
+
+    public static byte[] doubleToBytes(double x)
+    {
+        buffer.putDouble(0, x);
+        return buffer.array();
+    }
+
+    public static double bytesToDouble(byte[] bytes)
+    {
+        buffer.put(bytes, 0, bytes.length);
+        buffer.flip();//need flip
+        return buffer.getDouble();
     }
 }

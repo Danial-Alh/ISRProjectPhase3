@@ -1,11 +1,11 @@
 package DataStructures.Tree;
 
-import Primitives.Interfaces.Parsable;
-import Primitives.Interfaces.Sizeofable;
 import DataStructures.Tree.Nodes.DataLocations.FileDataLocation;
 import DataStructures.Tree.Nodes.DataLocations.RamDataLocation;
 import DataStructures.Tree.Nodes.FileNode;
 import DataStructures.Tree.Nodes.RamFileNode;
+import Primitives.Interfaces.Parsable;
+import Primitives.Interfaces.Sizeofable;
 import javafx.util.Pair;
 
 import java.util.HashMap;
@@ -16,9 +16,9 @@ public class ExtendedFileBtree<Value extends Sizeofable & Parsable> extends File
     private HashMap<Long, RootInfo> roots;
     private RamFileBtree<Value> ramFileBtree;
 
-    public ExtendedFileBtree(int keyMaxSize, int valueMaxSize, int halfMaxSize, Class valueClassType, RamFileBtree<Value> ramFileBtree)
+    public ExtendedFileBtree(int keyMaxSize, int valueMaxSize, int halfMaxSize, Class valueClassType, RamFileBtree<Value> ramFileBtree, int fileID)
     {
-        super(keyMaxSize, valueMaxSize, halfMaxSize, valueClassType);
+        super(keyMaxSize, valueMaxSize, halfMaxSize, valueClassType, fileID);
         roots = new HashMap<>();
         this.ramFileBtree = ramFileBtree;
     }

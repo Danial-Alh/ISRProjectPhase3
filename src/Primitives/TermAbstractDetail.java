@@ -21,18 +21,20 @@ public class TermAbstractDetail implements Parsable, Sizeofable
         byte[] bytes = new byte[sizeof()];
         byte[] occrByte = ByteUtils.intToBytes(occurences);
         byte[] ptrByte = ByteUtils.longToBytes(filePtr);
-        System.arraycopy(occrByte, 0, bytes, 0, occrByte.length);
-        System.arraycopy(ptrByte, 0, bytes, occrByte.length, ptrByte.length);
+        System.arraycopy(ByteUtils.intToBytes(occrByte.length), 0, bytes, 0, 1);
+        System.arraycopy(occrByte, 0, bytes, 1, occrByte.length);
+        System.arraycopy(ptrByte, 0, bytes, occrByte.length+1, ptrByte.length);
         return bytes;
     }
 
     @Override
     public void parseFromByteArray(byte[] input)
     {
-        byte[] occrByte = new byte[Integer.BYTES];
-        byte[] ptrByte = new byte[Long.BYTES];
-        System.arraycopy(input, 0, occrByte, 0, occrByte.length);
-        System.arraycopy(input, 0, ptrByte, 0, ptrByte.length);
+        int size = ByteUtils.bytesToInt(new byte[]{input[0]});
+        byte[] occrByte = new byte[size];
+        byte[] ptrByte = new byte[input.length-size-1];
+        System.arraycopy(input, 1, occrByte, 0, occrByte.length);
+        System.arraycopy(input, occrByte.length+1, ptrByte, 0, ptrByte.length);
         occurences = ByteUtils.bytesToInt(occrByte);
         filePtr = ByteUtils.bytesToLong(ptrByte);
     }
@@ -40,7 +42,7 @@ public class TermAbstractDetail implements Parsable, Sizeofable
     @Override
     public int sizeof()
     {
-        return Integer.BYTES + Long.BYTES;
+        return Integer.BYTES + Long.BYTES + 1; // for store size
     }
 
     public Integer getOccurences()

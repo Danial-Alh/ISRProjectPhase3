@@ -1,18 +1,14 @@
 package Primitives;
 
-/**
- * Created by danial on 5/28/16.
- */
 public class TermVector
 {
-    private FreqWeight[] termFreqVector;
-    private double length;//length of vector
-    public double getLength()
+    private TermFreqVector termFreqVector;
+    public int getLength()
     {
-        return this.length;
+        return termFreqVector.size();
     }
 
-    public FreqWeight[] getFreqWeight()
+    public TermFreqVector getFreqWeight()
     {
         return this.termFreqVector;
     }

@@ -1,9 +1,9 @@
 package DataStructures.Tree;
 
-import Primitives.Interfaces.Parsable;
-import Primitives.Interfaces.Sizeofable;
 import DataStructures.Tree.Nodes.DataLocations.FileDataLocation;
 import DataStructures.Tree.Nodes.FileNode;
+import Primitives.Interfaces.Parsable;
+import Primitives.Interfaces.Sizeofable;
 import javafx.util.Pair;
 
 import java.util.Vector;
@@ -12,9 +12,9 @@ public class FileBtree<Value extends Sizeofable & Parsable> extends FileBtreeTem
 {
     Long root;
 
-    public FileBtree(int keyMaxSize, int valueMaxSize, int halfMaxSize, Class valueClassType)
+    public FileBtree(int keyMaxSize, int valueMaxSize, int halfMaxSize, Class valueClassType, int fileID)
     {
-        super(keyMaxSize, valueMaxSize, halfMaxSize, valueClassType);
+        super(keyMaxSize, valueMaxSize, halfMaxSize, valueClassType, fileID);
         this.root = createNewLeafNode(null).getMyPointer();
     }
 

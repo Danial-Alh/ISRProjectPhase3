@@ -1,9 +1,9 @@
 package DataStructures.Tree;
 
-import Primitives.Interfaces.Parsable;
-import Primitives.Interfaces.Sizeofable;
 import DataStructures.Tree.Nodes.DataLocations.FileDataLocation;
 import DataStructures.Tree.Nodes.FileNode;
+import Primitives.Interfaces.Parsable;
+import Primitives.Interfaces.Sizeofable;
 import javafx.util.Pair;
 
 import java.util.HashMap;
@@ -13,14 +13,16 @@ public abstract class FileBtreeTemplate<Value extends Sizeofable & Parsable>
 {
     protected final int KEY_MAX_SIZE, VALUE_MAX_SIZE;
     protected final int HALF_MAX_SIZE, MAX_SIZE;
+    protected final int fileID;
     protected final Class valueClassType;
     protected int depth;
     protected HashMap<Long, FileNode<Value>> nodeCache;
 
     protected long numberOfTermsAdded;
 
-    public FileBtreeTemplate(int keyMaxSize, int valueMaxSize, int halfMaxSize, Class valueClassType)
+    public FileBtreeTemplate(int keyMaxSize, int valueMaxSize, int halfMaxSize, Class valueClassType, int fileID)
     {
+        this.fileID = fileID;
         nodeCache = new HashMap<>();
         KEY_MAX_SIZE = keyMaxSize;
         VALUE_MAX_SIZE = valueMaxSize;
@@ -104,7 +106,7 @@ public abstract class FileBtreeTemplate<Value extends Sizeofable & Parsable>
         cacheResult = nodeCache.get(obj);
         if (cacheResult == null)
         {
-            FileNode<Value> resultNode = new FileNode<>(KEY_MAX_SIZE, VALUE_MAX_SIZE, HALF_MAX_SIZE, null, valueClassType);
+            FileNode<Value> resultNode = new FileNode<>(KEY_MAX_SIZE, VALUE_MAX_SIZE, HALF_MAX_SIZE, null, valueClassType, fileID);
             resultNode.fetchNodeFromHard(obj);
             nodeCache.put(resultNode.getMyPointer(), resultNode);
             cacheResult = resultNode;
@@ -127,7 +129,7 @@ public abstract class FileBtreeTemplate<Value extends Sizeofable & Parsable>
 
     protected FileNode<Value> createNewMiddleNode(Long parent)
     {
-        FileNode<Value> resultNode = new FileNode<Value>(KEY_MAX_SIZE, VALUE_MAX_SIZE, HALF_MAX_SIZE, parent, valueClassType);
+        FileNode<Value> resultNode = new FileNode<Value>(KEY_MAX_SIZE, VALUE_MAX_SIZE, HALF_MAX_SIZE, parent, valueClassType, fileID);
         resultNode.fetchNodeFromHard(null);
         nodeCache.put(resultNode.getMyPointer(), resultNode);
         return resultNode;

@@ -10,29 +10,33 @@ import java.util.Vector;
 
 public class FileVector<Value extends Sizeofable & Parsable>
 {
+    protected final int fileID;
     private final int INDEX_DATA_SIZE = 10;
     private final Long NEXT_INDEX_Ptr_LOC_REL_TO_CURR_INDEX = (long) (Long.BYTES * INDEX_DATA_SIZE);
     private final Class valueClassType;
+    private int numberOfItemsAdded;
 
-    public FileVector(Class valueClassType)
+    public FileVector(Class valueClassType, int fileID)
     {
         this.valueClassType = valueClassType;
+        this.fileID = fileID;
+        numberOfItemsAdded = 0;
     }
 
     public Value elementAt(Long indexPtr, int offset)
     {
-        if(indexPtr == -1 || indexPtr == null)
+        if (indexPtr == -1 || indexPtr == null)
             return null;
         Long valuePtrOnFile = findValuePtrOnFile(indexPtr, offset);
-        if(valuePtrOnFile == null)
+        if (valuePtrOnFile == null)
             return null;
         return readValueAt(valuePtrOnFile);
     }
 
-    public Long writeElementAt(Long indexPtr, int offset,Value value)
+    public Long writeElementAt(Long indexPtr, int offset, Value value)
     {
-        if(indexPtr == null || indexPtr == -1)
-            indexPtr =  createNewIndex();
+        if (indexPtr == null || indexPtr == -1)
+            indexPtr = createNewIndex();
         Long valuePtrOnFile = createIndexAndFindValuePtrOnFile(indexPtr, offset);
         writeValueAt(valuePtrOnFile, value);
         return indexPtr;
@@ -40,24 +44,24 @@ public class FileVector<Value extends Sizeofable & Parsable>
 
     private Long createIndexAndFindValuePtrOnFile(Long indexPtr, int offset)
     {
-        RandomAccessFile instance = RandomAccessFileManager.getInstance();
+        RandomAccessFile instance = RandomAccessFileManager.getInstance(fileID);
         Long tempIndexPtr = indexPtr;
         while (true)
         {
             try
             {
-                if(offset < INDEX_DATA_SIZE)
+                if (offset < INDEX_DATA_SIZE)
                 {
-                    instance.seek(tempIndexPtr + offset*Long.BYTES);
+                    instance.seek(tempIndexPtr + offset * Long.BYTES);
                     Long resPtr = instance.readLong();
-                    if(resPtr == -1)
-                        resPtr = writeNewValueOnFile(tempIndexPtr + offset*Long.BYTES);
+                    if (resPtr == -1)
+                        resPtr = writeNewValueOnFile(tempIndexPtr + offset * Long.BYTES);
                     return resPtr;
                 }
 
                 instance.seek(tempIndexPtr + NEXT_INDEX_Ptr_LOC_REL_TO_CURR_INDEX);
                 Long tempNextIndexPtr = instance.readLong();
-                if(tempNextIndexPtr == -1)
+                if (tempNextIndexPtr == -1)
                 {
                     tempNextIndexPtr = createNewIndex();
                     instance.seek(tempIndexPtr + NEXT_INDEX_Ptr_LOC_REL_TO_CURR_INDEX);
@@ -75,16 +79,16 @@ public class FileVector<Value extends Sizeofable & Parsable>
 
     private Value readValueAt(Long valuePtrOnFile)
     {
-        RandomAccessFile instance = RandomAccessFileManager.getInstance();
+        RandomAccessFile instance = RandomAccessFileManager.getInstance(fileID);
         Value value = null;
         try
         {
             value = (Value) valueClassType.newInstance();
-            if(valuePtrOnFile < 0)
+            if (valuePtrOnFile < 0)
                 System.out.println("ljlskdjfl");
             instance.seek(valuePtrOnFile);
             int size = instance.readInt();
-            if(size == -1)
+            if (size == -1)
                 return null;
             byte tempByteArray[] = new byte[size];
             instance.read(tempByteArray);
@@ -98,7 +102,7 @@ public class FileVector<Value extends Sizeofable & Parsable>
 
     private void writeValueAt(Long valuePtrOnFile, Value value)
     {
-        RandomAccessFile instance = RandomAccessFileManager.getInstance();
+        RandomAccessFile instance = RandomAccessFileManager.getInstance(fileID);
         try
         {
             instance.seek(valuePtrOnFile);
@@ -113,7 +117,7 @@ public class FileVector<Value extends Sizeofable & Parsable>
 
     private Long writeNewValueOnFile(Long ptrInIndex)
     {
-        RandomAccessFile instance = RandomAccessFileManager.getInstance();
+        RandomAccessFile instance = RandomAccessFileManager.getInstance(fileID);
         Long resPtr = null;
         try
         {
@@ -123,6 +127,7 @@ public class FileVector<Value extends Sizeofable & Parsable>
             instance.seek(resPtr);
             instance.writeInt(-1);
             instance.write(new byte[((Value) valueClassType.newInstance()).sizeof()]);
+            numberOfItemsAdded++;
         } catch (IOException | InstantiationException | IllegalAccessException e)
         {
             e.printStackTrace();
@@ -132,22 +137,22 @@ public class FileVector<Value extends Sizeofable & Parsable>
 
     private Long findValuePtrOnFile(Long indexPtr, int offset)
     {
-        RandomAccessFile instance = RandomAccessFileManager.getInstance();
+        RandomAccessFile instance = RandomAccessFileManager.getInstance(fileID);
         Long tempIndexPtr = indexPtr;
         while (true)
         {
             try
             {
-                if(offset < INDEX_DATA_SIZE)
+                if (offset < INDEX_DATA_SIZE)
                 {
-                    instance.seek(tempIndexPtr + offset*Long.BYTES);
+                    instance.seek(tempIndexPtr + offset * Long.BYTES);
                     Long resPtr = instance.readLong();
                     return resPtr == -1 ? null : resPtr;
                 }
 
                 instance.seek(tempIndexPtr + NEXT_INDEX_Ptr_LOC_REL_TO_CURR_INDEX);
                 Long tempNextIndexPtr = instance.readLong();
-                if(tempNextIndexPtr == -1)
+                if (tempNextIndexPtr == -1)
                     return null;
                 tempIndexPtr = tempNextIndexPtr;
                 offset -= INDEX_DATA_SIZE;
@@ -161,12 +166,12 @@ public class FileVector<Value extends Sizeofable & Parsable>
     private Long createNewIndex()
     {
         Long returnAdd = null;
-        RandomAccessFile instance = RandomAccessFileManager.getInstance();
+        RandomAccessFile instance = RandomAccessFileManager.getInstance(fileID);
         try
         {
             instance.seek(instance.getChannel().size());
             returnAdd = instance.getFilePointer();
-            for(int i = 0; i <= INDEX_DATA_SIZE; i++) // one more write for ptr at end to next index
+            for (int i = 0; i <= INDEX_DATA_SIZE; i++) // one more write for ptr at end to next index
                 instance.writeLong(-1);
 
         } catch (IOException e)
@@ -179,12 +184,12 @@ public class FileVector<Value extends Sizeofable & Parsable>
 
     public Vector<Value> getAllElements(Long indexPtr)
     {
-        RandomAccessFile instance = RandomAccessFileManager.getInstance();
+        RandomAccessFile instance = RandomAccessFileManager.getInstance(fileID);
         Vector<Value> resultVector = new Vector<>();
         long tempIndexPtr = indexPtr;
         try
         {
-            while(true)
+            while (true)
             {
                 instance.seek(tempIndexPtr);
                 for (int i = 0; i < INDEX_DATA_SIZE; i++)
@@ -206,5 +211,10 @@ public class FileVector<Value extends Sizeofable & Parsable>
             e.printStackTrace();
         }
         return resultVector;
+    }
+
+    public int size()
+    {
+        return numberOfItemsAdded;
     }
 }

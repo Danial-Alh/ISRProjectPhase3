@@ -2,6 +2,7 @@ package DocIndexingManagement.Indexing;
 
 import DataStructures.Tree.RamFileBtree;
 import DataStructures.Vector.FileVector;
+import FileManagement.RandomAccessFileManager;
 import Primitives.TermAbstractDetail;
 import Primitives.TermDocDetail;
 import Primitives.TermPosting;
@@ -12,6 +13,7 @@ import java.util.Vector;
 public class Dictionary
 {
     private static Dictionary instance = null;
+    private final int indexFileID, vectorFileID;
     private RamFileBtree<TermAbstractDetail> tree;
     private FileVector<TermDocDetail> fileVector;
     private int lastOffsetRead;
@@ -19,17 +21,19 @@ public class Dictionary
 
     private Dictionary()
     {
+        indexFileID = RandomAccessFileManager.createNewInstance("index.txt");
+        vectorFileID = RandomAccessFileManager.createNewInstance("postingVector.txt");
         String temp = "ممممممممممممممممممممممممممممممممممممممم";
         TermAbstractDetail termAbstractDetail = new TermAbstractDetail(null, null);
-        tree = new RamFileBtree<>(temp.length(), termAbstractDetail.sizeof(), 17, TermAbstractDetail.class);
-        fileVector = new FileVector<>(TermDocDetail.class);
+        tree = new RamFileBtree<>(temp.length(), termAbstractDetail.sizeof(), 17, TermAbstractDetail.class, indexFileID);
+        fileVector = new FileVector<>(TermDocDetail.class, vectorFileID);
         lastOffsetRead = Integer.MAX_VALUE;
         lastNodeRead = null;
     }
 
     public static Dictionary getIntance()
     {
-        if(instance == null)
+        if (instance == null)
             instance = new Dictionary();
         return instance;
     }
@@ -37,7 +41,7 @@ public class Dictionary
     public void insert(String term, int docID)
     {
         TermAbstractDetail searchRes = tree.search(term);
-        if(searchRes == null)
+        if (searchRes == null)
         {
             Long indexPtr = fileVector.writeElementAt(null, docID, new TermDocDetail(1));
             try
@@ -48,11 +52,10 @@ public class Dictionary
                 e.printStackTrace();
             }
 
-        }
-        else
+        } else
         {
             TermDocDetail termDocDetail = fileVector.elementAt(searchRes.getFilePtr(), docID);
-            if(termDocDetail == null)
+            if (termDocDetail == null)
                 termDocDetail = new TermDocDetail(0);
             searchRes.incrementOccurences();
             termDocDetail.incrementOccurences();
@@ -70,10 +73,10 @@ public class Dictionary
 
     public TermPosting getNextTermPosting()
     {
-        if(lastOffsetRead >= lastNodeRead.size())
+        if (lastOffsetRead >= lastNodeRead.size())
         {
             lastNodeRead = tree.getNextNode();
-            if(lastNodeRead == null)
+            if (lastNodeRead == null)
                 return null;
             lastOffsetRead = 0;
         }
@@ -81,7 +84,7 @@ public class Dictionary
         Pair<String, TermAbstractDetail> currentPair = lastNodeRead.elementAt(lastOffsetRead);
         Vector<TermDocDetail> allElements = fileVector.getAllElements(currentPair.getValue().getFilePtr());
         TermPosting termPosting = new TermPosting(currentPair.getKey(), allElements,
-                Math.log(tree.getNumberOfTermsAdded()/allElements.size()));
+                Math.log(tree.getNumberOfTermsAdded() / allElements.size()));
 
         lastOffsetRead++;
         return termPosting;

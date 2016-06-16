@@ -10,51 +10,55 @@ import java.util.Vector;
  */
 public class Cluster
 {
+    Vector<Doc> followers;
     private FreqWeight[] termFreqVectorSample;
-    Vector <Doc> followers;
-    Cluster (FreqWeight[] termFreqVectorSample)
+
+    Cluster(FreqWeight[] termFreqVectorSample)
     {
-        this.termFreqVectorSample=termFreqVectorSample;
+        this.termFreqVectorSample = termFreqVectorSample;
     }
+
     public FreqWeight[] getTermFreqVectorSample()
     {
-        return  this.termFreqVectorSample;
+        return this.termFreqVectorSample;
     }
-    public void normalizeSample ()
+
+    public void normalizeSample()
     {
 
         int n = followers.size();
         int m = termFreqVectorSample.length;
-        FreqWeight [] res = new FreqWeight[m];
-        double [] tmpVal = new double[m];
-        FreqWeight [] tmpFW;
+        FreqWeight[] res = new FreqWeight[m];
+        double[] tmpVal = new double[m];
+        FreqWeight[] tmpFW;
 
-        for (int i=0; i<n ;i++)
+        for (int i = 0; i < n; i++)
         {
             tmpFW = followers.elementAt(i).getTermVector().getFreqWeight();
-            for (int j=0; j<m; j++)
+            for (int j = 0; j < m; j++)
             {
-                tmpVal[j]+=tmpFW[j].getValue();
+                tmpVal[j] += tmpFW[j].getValue();
             }
         }
-        for (int j=0; j<m; j++)
+        for (int j = 0; j < m; j++)
         {
-            tmpVal[j]/=n;
+            tmpVal[j] /= n;
             termFreqVectorSample[j].setValue(tmpVal[j]);
         }
 
 
-
     }
+
     public void calculateDistanceForAllFollowers()
     {
         //TODO:
-        for (Doc doc: followers)
+        for (Doc doc : followers)
         {
             double tmp = Arithmatics.getDistance(doc.getTermVector().getFreqWeight(), termFreqVectorSample);
             doc.setDistanceFromLeader(tmp);
         }
     }
+
     public void addToFollowers(Doc doc)
     {
         followers.add(doc);

@@ -1,11 +1,11 @@
 package DataStructures.Tree;
 
+import DataStructures.Tree.Nodes.DataLocations.RamDataLocation;
 import DataStructures.Tree.Nodes.FileNode;
+import DataStructures.Tree.Nodes.RamFileNode;
 import FileManagement.RandomAccessFileManager;
 import Primitives.Interfaces.Parsable;
 import Primitives.Interfaces.Sizeofable;
-import DataStructures.Tree.Nodes.DataLocations.RamDataLocation;
-import DataStructures.Tree.Nodes.RamFileNode;
 import javafx.util.Pair;
 
 import java.io.IOException;
@@ -18,8 +18,9 @@ public class RamFileBtree<Value extends Sizeofable & Parsable>
     protected final int KEY_MAX_SIZE;
     protected final int VALUE_MAX_SIZE;
     protected final int HALF_MAX_SIZE, MAX_SIZE;
-    protected final Class valueClassType;
     protected final long MB = 1024 * 1024;
+    protected final Class valueClassType;
+    protected final int fileID;
     protected int depth;
     protected RamFileNode<Value> root;
     private ExtendedFileBtree<Value> extendedFileBtree;
@@ -28,12 +29,13 @@ public class RamFileBtree<Value extends Sizeofable & Parsable>
     private boolean isFirstRead;
     private long numberOfTermsAdded;
 
-    public RamFileBtree(int keyMaxSize, int valueMaxSize, int halfMaxSize, Class valueClassType)
+    public RamFileBtree(int keyMaxSize, int valueMaxSize, int halfMaxSize, Class valueClassType, int fileID)
     {
         KEY_MAX_SIZE = keyMaxSize;
         VALUE_MAX_SIZE = valueMaxSize;
         this.HALF_MAX_SIZE = halfMaxSize;
         this.valueClassType = valueClassType;
+        this.fileID = fileID;
         this.MAX_SIZE = 2 * halfMaxSize - 1;
         depth = 1;
         lastReadLocation = 0;
@@ -41,7 +43,7 @@ public class RamFileBtree<Value extends Sizeofable & Parsable>
         depthIncremented = false;
 
         root = createNewLeafNode(null);
-        extendedFileBtree = new ExtendedFileBtree<>(keyMaxSize, valueMaxSize, halfMaxSize, valueClassType, this);
+        extendedFileBtree = new ExtendedFileBtree<>(keyMaxSize, valueMaxSize, halfMaxSize, valueClassType, this, fileID);
     }
 
     public static int getNewID()
@@ -114,16 +116,16 @@ public class RamFileBtree<Value extends Sizeofable & Parsable>
 
     public Vector<Pair<String, Value>> getNextNode()
     {
-        if(isFirstRead)
+        if (isFirstRead)
             return getRootNode().getKeyValPair();
 
         FileNode<Value> node = null;
         try
         {
-            if(lastReadLocation >= RandomAccessFileManager.getInstance().getChannel().size())
+            if (lastReadLocation >= RandomAccessFileManager.getInstance(fileID).getChannel().size())
                 return null;
             node = extendedFileBtree.getNode(lastReadLocation);
-            lastReadLocation = RandomAccessFileManager.getInstance().getFilePointer();
+            lastReadLocation = RandomAccessFileManager.getInstance(fileID).getFilePointer();
         } catch (IOException e)
         {
             e.printStackTrace();

@@ -3,45 +3,53 @@ package FileManagement;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
+import java.util.HashMap;
+import java.util.Vector;
 
 public class RandomAccessFileManager
 {
     private static String path = "index.txt";
-    private static boolean instanceCreated = false;
-    private static RandomAccessFile instance = null;
+    private static HashMap<String, Integer> fileNames = new HashMap<>();
+    private static Vector<RandomAccessFile> instances = new Vector<>();
 
     protected RandomAccessFileManager()
     {
 
     }
 
-    public static RandomAccessFile getInstance()
+    public static int createNewInstance(String fileName)
     {
-        if(!instanceCreated)
+        Integer id = fileNames.get(fileName);
+        if (id != null)
+            return id;
+
+        System.out.println("instance creating file name" + fileName);
+        try
         {
-            System.out.println("instance creating");
-            instanceCreated = true;
-            try
+            File file = new File(path + fileName);
+            if (file.exists())
             {
-                File file = new File(path);
-                if (file.exists())
-                {
-                    file.delete();
-                    System.out.println("deleting last index");
-                }
-                instance = new RandomAccessFile(path, "rw");
-            } catch (FileNotFoundException e)
-            {
-                e.printStackTrace();
+                file.delete();
+                System.out.println("deleting last index file name" + fileName);
             }
+            instances.add(new RandomAccessFile(path + fileName, "rw"));
+            fileNames.put(fileName, instances.size() - 1);
+        } catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
         }
-        return instance;
+        return instances.size() - 1;
+    }
+
+    public static RandomAccessFile getInstance(int id)
+    {
+        return instances.elementAt(id);
     }
 
     @Override
     protected void finalize() throws Throwable
     {
-        if(instance != null)
+        for (RandomAccessFile instance : instances)
             instance.close();
         super.finalize();
     }

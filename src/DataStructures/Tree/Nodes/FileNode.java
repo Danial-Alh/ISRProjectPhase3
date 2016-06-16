@@ -15,12 +15,13 @@ public class FileNode<Value extends Sizeofable & Parsable>
     protected final int KEY_MAX_SIZE, VALUE_MAX_SIZE;
     protected final int HALF_MAX_SIZE, MAX_SIZE;
     protected final Class valueClassType;
+    protected final int fileID;
     protected Vector<Pair<String, Value>> keyValPair;
     protected Vector<Long> child;
     protected Long parent, myPointer;
     protected int id;
 
-    public FileNode(int key_max_size, int value_max_size, int halfMaxSize, Long parent, Class valueClassType)
+    public FileNode(int key_max_size, int value_max_size, int halfMaxSize, Long parent, Class valueClassType, int fileID)
     {
         KEY_MAX_SIZE = key_max_size;
         VALUE_MAX_SIZE = value_max_size;
@@ -31,6 +32,7 @@ public class FileNode<Value extends Sizeofable & Parsable>
         this.id = RamFileBtree.getNewID();
         keyValPair = new Vector<>();
         child = new Vector<>();
+        this.fileID = fileID;
     }
 
     public int getId()
@@ -158,7 +160,7 @@ public class FileNode<Value extends Sizeofable & Parsable>
 
     public void fetchNodeFromHard(Long myPointer)
     {
-        RandomAccessFile instance = RandomAccessFileManager.getInstance();
+        RandomAccessFile instance = RandomAccessFileManager.getInstance(fileID);
         if (myPointer == null)
             try
             {
@@ -215,7 +217,7 @@ public class FileNode<Value extends Sizeofable & Parsable>
 
     private void commitNewNodeOnFile()
     {
-        RandomAccessFile instance = RandomAccessFileManager.getInstance();
+        RandomAccessFile instance = RandomAccessFileManager.getInstance(fileID);
         try
         {
             instance.seek(myPointer);
@@ -242,7 +244,7 @@ public class FileNode<Value extends Sizeofable & Parsable>
     public void commitChanges()
     {
 //            System.out.println("committing, pointer: " + myPointer);
-        RandomAccessFile instance = RandomAccessFileManager.getInstance();
+        RandomAccessFile instance = RandomAccessFileManager.getInstance(fileID);
         try
         {
             instance.seek(myPointer);
