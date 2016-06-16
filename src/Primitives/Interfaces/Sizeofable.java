@@ -1,4 +1,4 @@
-package Primitives;
+package Primitives.Interfaces;
 
 /**
  * Created by danial on 5/2/16.

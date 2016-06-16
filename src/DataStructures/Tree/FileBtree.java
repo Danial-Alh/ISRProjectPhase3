@@ -1,7 +1,7 @@
 package DataStructures.Tree;
 
-import Primitives.Parsable;
-import Primitives.Sizeofable;
+import Primitives.Interfaces.Parsable;
+import Primitives.Interfaces.Sizeofable;
 import DataStructures.Tree.Nodes.DataLocations.FileDataLocation;
 import DataStructures.Tree.Nodes.FileNode;
 import javafx.util.Pair;

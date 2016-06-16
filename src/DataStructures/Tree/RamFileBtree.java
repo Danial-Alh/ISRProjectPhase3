@@ -1,7 +1,7 @@
 package DataStructures.Tree;
 
-import Primitives.Parsable;
-import Primitives.Sizeofable;
+import Primitives.Interfaces.Parsable;
+import Primitives.Interfaces.Sizeofable;
 import DataStructures.Tree.Nodes.DataLocations.RamDataLocation;
 import DataStructures.Tree.Nodes.RamFileNode;
 import javafx.util.Pair;

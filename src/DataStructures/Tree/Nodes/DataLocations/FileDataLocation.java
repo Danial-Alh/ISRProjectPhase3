@@ -1,8 +1,8 @@
 package DataStructures.Tree.Nodes.DataLocations;
 
 import DataStructures.Tree.Nodes.FileNode;
-import Primitives.Parsable;
-import Primitives.Sizeofable;
+import Primitives.Interfaces.Parsable;
+import Primitives.Interfaces.Sizeofable;
 
 public class FileDataLocation<Value extends Sizeofable & Parsable> extends DataLocation<FileNode<Value>>
 {

@@ -1,8 +1,8 @@
 package DataStructures.Tree.Nodes;
 
 import DataStructures.Tree.RamFileBtree;
-import Primitives.Parsable;
-import Primitives.Sizeofable;
+import Primitives.Interfaces.Parsable;
+import Primitives.Interfaces.Sizeofable;
 import javafx.util.Pair;
 
 import java.util.Vector;

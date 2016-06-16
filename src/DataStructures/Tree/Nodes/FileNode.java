@@ -2,8 +2,8 @@ package DataStructures.Tree.Nodes;
 
 import DataStructures.Tree.RamFileBtree;
 import FileManagement.RandomAccessFileManager;
-import Primitives.Parsable;
-import Primitives.Sizeofable;
+import Primitives.Interfaces.Parsable;
+import Primitives.Interfaces.Sizeofable;
 import javafx.util.Pair;
 
 import java.io.IOException;
@@ -196,7 +196,7 @@ public class FileNode<Value extends Sizeofable & Parsable>
                 tempByteArray = new byte[readSize];
                 instance.read(tempByteArray);
                 Value value = (Value) valueClassType.newInstance();
-                value.parsefromByteArray(tempByteArray);
+                value.parseFromByteArray(tempByteArray);
                 keyValPair.add(new Pair<>(key, value));
             }
             for (int i = 0; i <= size; i++)
