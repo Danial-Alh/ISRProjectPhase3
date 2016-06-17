@@ -8,6 +8,10 @@ public class TermDocDetail implements Sizeofable, Parsable
 {
     private Integer occurences;
 
+    public TermDocDetail() {
+        this.occurences = 0;
+    }
+
     public TermDocDetail(Integer occurences)
     {
         this.occurences = occurences;
