@@ -8,6 +8,10 @@ public class TermDocDetail implements Sizeofable, Parsable
 {
     private Integer occurences;
 
+    public TermDocDetail() {
+        this.occurences = 0;
+    }
+
     public TermDocDetail(Integer occurences)
     {
         this.occurences = occurences;
@@ -22,7 +26,8 @@ public class TermDocDetail implements Sizeofable, Parsable
     @Override
     public void parseFromByteArray(byte[] input)
     {
-        occurences = ByteUtils.bytesToInt(input);
+//        System.out.println(input);
+        occurences = 10;//ByteUtils.bytesToInt(input);
     }
 
     @Override

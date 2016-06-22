@@ -4,6 +4,7 @@ public class TermVector
 {
     private TermFreqVector termFreqVector;
 
+
     public TermVector(String term)
     {
         termFreqVector = new TermFreqVector(this, term);

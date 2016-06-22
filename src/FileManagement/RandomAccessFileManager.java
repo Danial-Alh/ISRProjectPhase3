@@ -8,7 +8,7 @@ import java.util.Vector;
 
 public class RandomAccessFileManager
 {
-    private static String path = "index.txt";
+    private static String path = "";
     private static HashMap<String, Integer> fileNames = new HashMap<>();
     private static Vector<RandomAccessFile> instances = new Vector<>();
 

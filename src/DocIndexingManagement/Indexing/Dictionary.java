@@ -14,16 +14,16 @@ public class Dictionary
 {
     private static Dictionary instance = null;
     private final int indexFileID, vectorFileID;
-    private RamFileBtree<TermAbstractDetail> tree;
+    public RamFileBtree<TermAbstractDetail> tree;
     private FileVector<TermDocDetail> fileVector;
     private int lastOffsetRead;
     private Vector<Pair<String, TermAbstractDetail>> lastNodeRead;
 
-    private Dictionary()
+    private Dictionary(int id)
     {
-        indexFileID = RandomAccessFileManager.createNewInstance("index.txt");
-        vectorFileID = RandomAccessFileManager.createNewInstance("postingVector.txt");
-        String temp = "ممممممممممممممممممممممممممممممممممممممم";
+        indexFileID = RandomAccessFileManager.createNewInstance("index"+id);
+        vectorFileID = RandomAccessFileManager.createNewInstance("postingVector"+id);
+        String temp = "ممممممممممممممممممممممممممممممممممممممممممممممممممممممممممممممممممممممم";
         TermAbstractDetail termAbstractDetail = new TermAbstractDetail(null, null);
         tree = new RamFileBtree<>(temp.length(), termAbstractDetail.sizeof(), 17, TermAbstractDetail.class, indexFileID);
         fileVector = new FileVector<>(TermDocDetail.class, vectorFileID);
@@ -31,12 +31,17 @@ public class Dictionary
         lastNodeRead = null;
     }
 
-    public static Dictionary getIntance()
+    public static Dictionary getIntance(int id)
     {
         if (instance == null)
-            instance = new Dictionary();
+            instance = new Dictionary(id);
         return instance;
     }
+
+    public TermAbstractDetail search(String key){
+        return tree.search(key);
+    }
+
 
     public void insert(String term, int docID)
     {

@@ -60,7 +60,7 @@ public class FileReader {
             token = scanner.next();
             size += token.length();
             strings.add(token);
-            if (size >= bufferSize || token.equals("<مقاله>")){
+            if (token.equals("<مقاله>")){
                 return strings;
             }
         }
