@@ -1,6 +1,5 @@
 package Ui;
 
-import com.sun.tools.javac.util.Pair;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
